@@ -1,0 +1,31 @@
+---
+- name: Provision Slave Node
+  hosts: slave
+  tasks:
+    - name: Execute the bash script on the Slave node
+      become: yes
+      script: ./script.sh
+
+- name: Verify PHP application access
+  hosts: slave
+  tasks:
+    - name: Check if the PHP application is accessible
+      uri:
+        url: http://192.168.56.11
+        return_content: yes
+      register: php_app_check
+    - name: Debug PHP application access
+      debug:
+        var: php_app_check
+
+- name: Create a cron job to check server uptime at 12 am
+  hosts: slave
+  become: yes
+  tasks:
+    - name: Create cron job
+      cron:
+        name: Check_Uptime
+        minute: 0
+        hour: 0
+        job: "uptime >> /var/log/uptime.log"
+
